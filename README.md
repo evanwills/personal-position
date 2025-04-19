@@ -1,13 +1,47 @@
-# personal-position
+# `see-me`
 
-Personal location sharing app with a focus on privacy and security.
+* About `see-me`
+  * [Introduction](#introduction)
+  * [Data retention](#data-retention)
+  * [Making a connection](#making-a-connection)
+  * [Sharing your location](#sharing-your-location)
+  * [If you can't see me, I can't see you.](#if-you-cant-see-me-i-cant-see-you)
+  * [Receiving other peoples location](#receiving-other-peoples-location)
+  * [Encryption](#encryption)
+* [Standard data](./README_data.md)
+  * [Introduction](./README_data.md#introduction)
+  * [Location, simple status, text request body](./README_data.md#location-simple-status-text-request-body)
+  * [Location, simple status, text response body](./README_data.md#location-simple-status-text-response-body)
+  * [Encrypted blob (`data`)](./README_data.md#encrypted-blob-data)
+    * [blob `data` for location update](./README_data.md#blob-data-for-location-update)
+    * [blob `data` for simple status update](./README_data.md#blob-data-for-simple-status-update)
+    * [blob `data` for text message](./README_data.md#blob-data-for-text-message)
+* [Type & Sub-Type codes](./README_status.md)
+  * [Primary data types](./README_status.md#primary-data-types)
+  * [Simple status updates](./README_status.md#simple-status-updates)
+    * [Danger personal status updates](./README_status.md#danger-personal-status-updates)
+    * [General personal status updates](./README_status.md#general-personal-status-updates)
+  * [Movement types](./README_status.md#movement-types)
+  * [Text message types](./README_status.md#text-message-types)
+  * [Connection management types](./README_status.md#connection-management-types)
+  * [Server message types](./README_status.md#server-message-types)
+* [Connection management](./README_connection.md)
 
-This app is intended for use by people who regularly share the same
-physical space and want to share the location.
+## Introduction
+
+`see-me` is primarily a location sharing app with a focus on privacy and security.
+
+This app is intended to be used by people who regularly share the same
+physical space and want to share the location with each other.
 The target audience is families.
 
 This app intends to make it as difficult as possible to be uses for
-coercive control.
+coercive control. This is achieved by the app only showing other
+people's location while your location is visible to them.
+i.e. If you turn off your device's location you cannot see anyone
+else's location while other people cannot see your location.
+
+Data is encrypted end-to-end using public/private key crypto. Key's  where no
 
 ## Data retention
 
@@ -18,13 +52,12 @@ the recipient has confirmed that the packets have been received.
 ## Making a connection
 
 To be able to see another person's location both people must make a
-"connection" by showing each other a QR code from their screen. The
-QR code contains the user's public key and their personal ID as
-registered on the intermediary server. The two devices then create a
-shared symetric key that they both store locally.
+"connection" by showing each other a QR code from their screen.
 
 > __Note:__ To use multiple devices a separate connection must be
 >           made with each device.
+
+(See [Connection management](./README_connection.md) for more info)
 
 ## Sharing your location
 
@@ -33,37 +66,17 @@ shared QR codes with (made a "connection" with). When your location
 is sent to the intermediary server, a separate packet is sent for
 each person you have a "connection" with.
 
-Each packet has:
+See [Location, simple status, text request body](./README_data.md#location-simple-status-text-request-body)
+for more info on data structures.
 
-```json
-{
-    "srcID": "[40 character alpha-numeric string]",
-    "targetID": "[40 character alpha-numeric string]",
-    "packetID": "[number]",
-    "data": "[encrypted blob]"
-}
-```
-
-The encrypted data blob contains the following JSON
-```JSON
-{
-    "start": "[ISO 8601 date/time format string]",
-    "end": "[ISO 8601 date/time format string]",
-    "lat": "[number]",
-    "long": "[number]",
-    "message": "[UTF8 string, base64 encoded] (512 char limit)",
-    "sharing": true,
-    "status": "[number] (16 bit)",
-    "travelSpeed": "[number] (metres/second)"
-}
-```
 
 ### If you can't see me, I can't see you.
 
-Each packet sent to a `targetID` contains your location sharing
-status. The target person's app will stop sending you their location
-until they allow it. This must be done each time your location is
-disabled.
+Each packet sent to a `pairID` contains your location sharing
+status. If you turn off your location, the target person's app will
+stop sending you their location until they allow it. Your client will
+also delete any new location data packets it receives after you turn
+off your location.
 
 While your location is disabled you may still get personal status
 updates if the target person has allowed it.
@@ -74,8 +87,7 @@ The app sends a request to the server listing with an array
 
 ## Encryption
 
-The `data` blob is first encrypted using the shared symetric key,
-then with the public key of the other half of the "connection", then
-again with your own private key.
+The `data` blob is first encrypted using your private key,
+then with the public key of the other half of the "connection".
 
 
