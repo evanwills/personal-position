@@ -87,6 +87,7 @@ delete those packets.
     {
       "pairID": "recipient's unique key for this pair",
       "packetID": 000010002,
+      // Blob is encrypted using the recipient's public key for this connection
       "blob": "Base64 encoded encrypted blob",
     },
     // Sometimes the server needs to communicate with a client
@@ -113,7 +114,18 @@ delete those packets.
 
 ## Encrypted blob (`data`)
 
-### blob `data` for location update
+### Outer blob
+
+```JSON
+// The outer blob is encrypted using the recipient's public key
+{
+  "senderID": "Sender's unique key for this pair",
+  // The inner blob is encrypted using the sender's private key
+  "blob": "Base64 encoded encrypted blob"
+}
+```
+
+### Inner blob `data` for location update
 
 Location packets can be sent up to 4 times a minute but will only be
 sent while location is changing.
@@ -123,7 +135,7 @@ __Packet size:__ 45 characters
 Structured form after parsing
 
 ```json
-{
+{ // This blob is encrypted using the sender's private key
   "type": 1,
   "subType": 3, // walking
   "sharing": 1, // 1 = true, 0 = false
@@ -140,7 +152,7 @@ Compressed form during transmition and at rest on server
 ```
 
 
-### blob `data` for simple status update
+### Inner blob `data` for simple status update
 
 Simple status update packets will only be sent when the client does
 so manually.
@@ -150,7 +162,7 @@ __Packet size:__ 29 characters
 Structured form after parsing
 
 ```json
-{
+{ // This blob is encrypted using the sender's private key
   "type": 3,
   "subType": 04,
   "sharing": 1, // 1 = true, 0 = false
@@ -164,7 +176,7 @@ Compressed form during transmition and at rest on server
 30412025-04-19T19:41:05+10:00
 ```
 
-### blob `data` for text message
+### Inner blob `data` for text message
 
 Text message packets are always 124 characters long. The first 15
 characters of the string are metadata the characters (ending in a
@@ -176,7 +188,7 @@ __Packet size:__ 128 characters
 Structured form after parsing
 
 ```json
-{
+{ // This blob is encrypted using the sender's private key
   "type": 4,
   "subType": 1,
   "sharing": 1, // 1 = true, 0 = false

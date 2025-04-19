@@ -32,8 +32,11 @@
 `see-me` is primarily a location sharing app with a focus on privacy and security.
 
 This app is intended to be used by people who regularly share the same
-physical space and want to share the location with each other.
-The target audience is families.
+physical space and want to share their location with each other.
+
+The target audience is families with teenage kids or where one or
+more family members have a disability that means they may not be able
+to communicate their location when they need assistance.
 
 This app intends to make it as difficult as possible to be uses for
 coercive control. This is achieved by the app only showing other
@@ -41,7 +44,17 @@ people's location while your location is visible to them.
 i.e. If you turn off your device's location you cannot see anyone
 else's location while other people cannot see your location.
 
-Data is encrypted end-to-end using public/private key crypto. Key's  where no
+Data is encrypted end-to-end using public/private key crypto. Key's
+are shared by one device's screen showing a QR code and the other
+device reading the QR Code. Public keys are never sent across the
+network. Before data leaves a device it is encrypted using the
+sender's private key then again using the recipient's public key.
+The server only know's the recipient's ID and that the sender is
+allowed to send data to the recipient.
+
+> __Note:__ Each pair connection has unique public/private keys for
+>           both sender and recipient and keys should be regenerated
+>           every three months.
 
 ## Data retention
 
