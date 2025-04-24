@@ -45,6 +45,7 @@ To establish a connection between two clients:
       {
         "senderID": "Client A's pair ID",
         "recipientID": "Client B's pair ID",
+        "signature": "[SHA256 string]",
       }
       ```
    2. `Client A` sends the encrypted `initiate connection packet` to
@@ -65,7 +66,7 @@ To establish a connection between two clients:
         "recipientID": "Client B's pair ID",
         // `signature` confirm that the server has already seen this
         // sender/recipient ID pair
-        "signature": "[encrypted blob]"
+        "signature": "[SHA256 string]",
       }
       ```
    2. The server uses the signature to verify the authenticity of

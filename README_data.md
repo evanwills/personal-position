@@ -97,11 +97,11 @@ delete those packets.
     //      X Date/time & Y Date/time
     // NOTE: Server messages are not encrypted
     {
-      "pairID": "SERVER",
+      "pairID": "user's unique key for this server",
       "packetID": 000000079,
-      "type": 5,
-      "subType": 3,
       "data": {
+        "type": 5,
+        "subType": 3,
         "serverHost": "see-me.com.au",
         "accountKey": "Account public key",
         "message": "Client B's pairID",
@@ -130,25 +130,31 @@ delete those packets.
 Location packets can be sent up to 4 times a minute but will only be
 sent while location is changing.
 
-__Packet size:__ 45 characters
+__Packet size:__ 52 characters
 
 Structured form after parsing
 
 ```json
 { // This blob is encrypted using the sender's private key
-  "type": 1,
-  "subType": 3, // walking
-  "sharing": 1, // 1 = true, 0 = false
-  "long": "-033.86760393347335", // Longitude
-  "lat": "+151.20859451303656", // Latitude
-  "kmh": 000.0 // traveling speed in km/h
+  "type": 1, // (index 0 - 1)
+  "subType": 3, // walking (index 1 - 2)
+  // Unix timestamp for when the message was created
+  // (according to the sender)
+  "sentAt": 1745359886, // (index 2 - 14)
+  // When sent the `+` & `-` are converted to `1` & `0` respectively
+  // and the decimal is removed
+  "longitude": "-033.86760393347335",
+  "latitude": "+151.20859451303656",
+  // traveling speed in km/h at time packet was created
+  // (in transit, decimal point is removed)
+  "speed": 000.0,
 }
 ```
 
 Compressed form during transmition and at rest on server
 
 ```text
-131-033.86760393347335+151.20859451303656000.0
+1317453598860033867603933473351151208594513036560000
 ```
 
 
@@ -157,7 +163,7 @@ Compressed form during transmition and at rest on server
 Simple status update packets will only be sent when the client does
 so manually.
 
-__Packet size:__ 29 characters
+__Packet size:__ 13 characters
 
 Structured form after parsing
 
@@ -165,20 +171,21 @@ Structured form after parsing
 { // This blob is encrypted using the sender's private key
   "type": 3,
   "subType": 04,
-  "sharing": 1, // 1 = true, 0 = false
-  "sentAt": "2025-04-19T19:41:05+10:00"
+  // Unix timestamp for when the message was sent
+  // (according to the sender)
+  "sentAt": 1745359886
 }
 ```
 
 Compressed form during transmition and at rest on server
 
 ```text
-30412025-04-19T19:41:05+10:00
+3041745359886
 ```
 
 ### Inner blob `data` for text message
 
-Text message packets are always 124 characters long. The first 15
+Text message packets are always 124 characters long. The first 25
 characters of the string are metadata the characters (ending in a
 pipe/vertical bar `|`) are padding (if required) and the rest of
 the packet is the text message.
@@ -207,19 +214,22 @@ Structured form after parsing
   // If a message is longer than 113 characters this is the total
   // number of parts that make up the whole message
   "of": 01,
+  // Unix timestamp for when the message was sent
+  // (according to the sender)
+  "sentAt": 1745359886,
   // Padding ensures that text message packets are always 128
   // characters long. When padding is applied it's end is marked with
   // a pipe/vertical bar `|`
-  "padding": "wpqLu96dgHIsWgRzizFmHX50NqPlNxP36L1fGBIn4IOjgU0kHhb8jxAhkE9J",
+  "padding": "wpqLu96dgHIsWgRzizFmHX50NqPlNxP36L1fGBIn4IOjgU0kHh",
   // Text message within each packet can be up to 112 characters
   // long. Messages that are longer than 112 characters will be
   // split across multiple packets
-  "msg": "Ok. We just came back from a walk on Mt Kosciuszko"
+  "msg": "Ok. We just came back from a walk on Mt Kosciuszko",
 }
 ```
 
 Compressed form during transmition and at rest on server
 
 ```text
-41100001063200101wpqLu96dgHIsWgRzizFmHX50NqPlNxP36L1fGBIn4IOjgU0kHhb8jxAhkE9J|Ok. We just came back from a walk on Mt Kosciuszko
+411000010632001011745359886wpqLu96dgHIsWgRzizFmHX50NqPlNxP36L1fGBIn4IOjgU0kHh|Ok. We just came back from a walk on Mt Kosciuszko
 ```

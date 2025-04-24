@@ -173,7 +173,9 @@ CREATE TABLE `server_list` {
 CREATE TABLE `server_accounts` {
   `account_id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `account_server_id` tinyint(3) unsigned NOT NULL,
-  `account_key` varchar(255) NOT NULL,
+  `account_server_public_key` varchar(255) NOT NULL,
+  `account_private_key` varchar(255) NOT NULL,
+  `account_public_key` varchar(255) NOT NULL,
   `account_session_key` varchar(255) DEFAULT NULL,
   `account_session_expires` timestamp DEFAULT NULL,
   `account_name` varchar(64) NOT NULL,
@@ -210,6 +212,7 @@ CREATE TABLE `location_pins` {
 
 CREATE TABLE `connections` {
   `connection_id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  `connection_is_server` tinyint(1) unsigned NOT NULL DEFAULT 0, -- whether or not this connection is just with a server
   `connection_account_id` tinyint(3) unsigned NOT NULL,
   `connection_created_at` timestamp NOT NULL DEFAULT NOW(),
   `connection_packet_counter` int(11) unsigned NOT NULL DEFAULT 0, -- incremented every time a packet is sent to the recipient ID (up to four times a minute)

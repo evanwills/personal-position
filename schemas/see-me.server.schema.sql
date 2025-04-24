@@ -80,12 +80,13 @@ CREATE TABLE `pending_connection_request` {
   `pending_connection_request_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `pending_connection_request_expire_at` timestamp NOT NULL,
   `pending_connection_request_initiator_id` int(11) unsigned NOT NULL,
+  `pending_connection_request_signature` char(40) NOT NULL,
   `pending_connection_request_sender_id` char(40) NOT NULL,
   `pending_connection_request_recipient_id` char(40) NOT NULL,
-  KEY `IND_packet_queue_expire_at` (`packet_queue_expire_at`),
-  KEY `IND_packet_queue_recipient_id` (`packet_queue_recipient_id`),
-	CONSTRAINT `foreign_pending_connection_request_expire_at`
-		FOREIGN KEY (`pending_connection_request_expire_at`)
+  KEY `IND_ending_connection_request_expire_at` (`ending_connection_request_expire_at`),
+  KEY `IND_ending_connection_request_recipient_id` (`ending_connection_request_recipient_id`),
+	CONSTRAINT `foreign_pending_connection_request_initiator_id`
+		FOREIGN KEY (`pending_connection_request_initiator_id`)
 		REFERENCES `user_connections` (`user_connection_id`)
 };
 
